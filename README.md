@@ -1,2 +1,7 @@
-# Unofficial-MangaLib-API
-Unofficially maintained library for MangaLib, AuthorToday and Renovels on .NET
+# Unofficial MangaLib API
+Unofficiall library for MangaLib, Ranobelib, AuthorToday and Renovels on .NET
+
+Maintained by AkashiDungeon.
+
+---
+
