@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace MangaLib
@@ -6,7 +7,9 @@ namespace MangaLib
     public partial class Client
     {
         /// <summary> Unauthorized insatance of MangaLib client. </summary>
-        public static Client Unauthorized = new global::MangaLib.Client();
+        public readonly static Client Unauthorized = new global::MangaLib.Client();
+        /// <summary> Intended as user defined handle. Must be explicitly set, unauthorized by default. </summary>
+        public static Client AuthorizedShared = new global::MangaLib.Client();
 
         /// <summary> Base url of the Mangalib API. By default <c>https://api.cdnlibs.org/</c> </summary>
         /// <remarks> 
@@ -42,8 +45,9 @@ namespace MangaLib
         private readonly CookieContainer CdnLibsCookies = new();
         public readonly HttpClient HttpClient;
         public readonly WebProxy? Proxy = null;
+        private readonly LogLevel _logLevel = LogLevel.None;
 
-        public AuthorizationToken _authorizationToken = AuthorizationToken.NullInstance;
+        private AuthorizationToken _authorizationToken = AuthorizationToken.NullInstance;
         /// <summary> Authorization token instance. </summary>
         public AuthorizationToken AuthorizationToken => _authorizationToken; 
         /// <summary> Token with Bearer prefix included. </summary>

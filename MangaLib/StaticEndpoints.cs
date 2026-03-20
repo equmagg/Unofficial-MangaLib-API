@@ -4,13 +4,16 @@ using System.Text;
 
 namespace MangaLib
 {
-    internal class Endpoints
+    public class Endpoints
     {
-        internal async static Task<bool> CheckAuthorizationTokenAsync(string token)
+        public async static Task<bool> CheckAuthorizationTokenAsync(string token)
         {
             var client = new global::MangaLib.Client(token);
 
             return await client.CheckAuthorizationTokenAsync();
         }
+
+        public async Task<List<MangaTitle>?> GetNewTitlesAsync() 
+            => await global::MangaLib.Client.GetNewTitlesAsync(global::MangaLib.Client.Unauthorized);
     }
 }
