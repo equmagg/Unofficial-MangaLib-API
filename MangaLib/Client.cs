@@ -6,16 +6,12 @@ namespace MangaLib
 {
     public partial class Client
     {
-        /// <summary> Unauthorized insatance of MangaLib client. </summary>
-        public readonly static Client Unauthorized = new global::MangaLib.Client();
-        /// <summary> Intended as user defined handle. Must be explicitly set, unauthorized by default. </summary>
-        public static Client AuthorizedShared = new global::MangaLib.Client();
 
         /// <summary> Base url of the Mangalib API. By default <c>https://api.cdnlibs.org/</c> </summary>
         /// <remarks> 
         /// MangaLib changes its API time to time, so you might want to override it yourself if it was changed. Overwise leave it as is. 
         /// </remarks>
-        public static string MangaLibApiBaseAddress
+        public static string MangaLibApiBaseAddress // note static initialization order, MangaLibApiBaseAddress must be above all static fields
         {
             get
             {
@@ -35,6 +31,11 @@ namespace MangaLib
                 field = value;
             }
         } = "https://api.cdnlibs.org/";
+
+        /// <summary> Unauthorized insatance of MangaLib client. </summary>
+        public readonly static Client Unauthorized = new global::MangaLib.Client();
+        /// <summary> Intended as user defined handle. Must be explicitly set, unauthorized by default. </summary>
+        public static Client AuthorizedShared = new global::MangaLib.Client();
         public Client(AuthorizationToken authorizationToken, WebProxy? proxy = null, LogLevel logLevel = LogLevel.None) 
             : this(authorizationToken.TokenString, proxy, logLevel) { }
         public Client(string? authorizationToken = null, WebProxy? proxy = null, LogLevel logLevel = LogLevel.None)
@@ -42,7 +43,7 @@ namespace MangaLib
             _logLevel = logLevel;
             AuthorizationTokenString = authorizationToken;
             _proxy = proxy;
-            HttpClient = CreateHttpClient(authorizationToken);
+            HttpClient = CreateHttpClient(authorizationToken, proxy);
         }
 
         private readonly CookieContainer Cookies = new();
@@ -106,9 +107,9 @@ namespace MangaLib
         /// </summary>
         private void UpdateClient()
         {
-            HttpClient = CreateHttpClient(AuthorizationTokenString);
+            HttpClient = CreateHttpClient(AuthorizationTokenString, _proxy);
         }
-        private HttpClient CreateHttpClient(string? authorizationToken)
+        private HttpClient CreateHttpClient(string? authorizationToken, WebProxy? proxy)
         {
             var handler = new SocketsHttpHandler
             {
@@ -118,7 +119,8 @@ namespace MangaLib
                 AllowAutoRedirect = true,
                 PooledConnectionLifetime = TimeSpan.FromMinutes(10),
 
-                UseProxy = false,
+                UseProxy = proxy != null,
+                Proxy = proxy,
             };
 
             var http = new HttpClient(handler, disposeHandler: false)

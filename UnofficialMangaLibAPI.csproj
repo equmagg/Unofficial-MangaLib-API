@@ -9,7 +9,7 @@
 
 	<PropertyGroup>
 		<PackageId>UnofficialMangaLibAPI</PackageId>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
 		<Authors>equmag</Authors>
 		<Description>Unofficially maintained library for MangaLib, RanobeLib, AuthorToday and Renovels on .NET</Description>
 
