@@ -50,6 +50,7 @@ namespace MangaLib
                 return false;
             }
         }
+
         public async Task<ulong> GetUserIdOrDefault(string token)
             => (await GetUserBaseDataAsync(token))?.Id ?? 0;
         private async Task<Me?> GetUserBaseDataAsync(string token) => await GetUserBaseDataAsync(this, token);
@@ -68,7 +69,7 @@ namespace MangaLib
                 else
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    client.LogWarning(nameof(GetUserBaseDataAsync), "Request not successfull. Responce body: " + errorContent);
+                    client.LogWarning(nameof(GetUserBaseDataAsync), "Request not successful. Responce body: " + errorContent);
                     return null;
                 }
             }
@@ -78,6 +79,7 @@ namespace MangaLib
                 return null; 
             }
         }
+
         public async Task<MangaLib.User?> GetUserAsync(ulong userId) => await GetUserAsync(this, userId);
         public static async Task<MangaLib.User?> GetUserAsync(Client client, ulong userId)
         {
@@ -107,6 +109,7 @@ namespace MangaLib
                 return null; 
             }
         }
+
         public async Task<uint> GetChapterIdOrDefaultAsync(string slug, uint chapter, uint volume = 1) 
             => (uint?)((await GetChapterAsync(slug, chapter, volume))?.Id) ?? 0u;
         public async Task<Chapter?> GetChapterAsync(string slug, uint chapter, uint volume = 1) => await GetChapterAsync(this, slug, chapter, volume);
@@ -137,6 +140,85 @@ namespace MangaLib
                 return null; 
             }
         }
+        public async Task<string?> GetStickyCommentAsync(string token, uint chapterId) => await GetStickyCommentAsync(this, token, chapterId);
+        public static async Task<string?> GetStickyCommentAsync(Client client, string token, uint chapterId)
+        {
+            try
+            {
+                var url = Client.MangaLibApiBaseAddress + $"api/comments/sticky?post_id={chapterId}&post_type=chapter";
+                HttpResponseMessage response = await client.HttpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    client.LogMessage(nameof(GetStickyCommentAsync), "successfully recieved comments\nResponce: " + responseBody);
+                    return responseBody;
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    client.LogWarning(nameof(GetStickyCommentAsync), "Responce body: " + errorContent);
+                    return null;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                client.LogError(nameof(GetStickyCommentAsync), ex.ToString());
+                return null;
+            }
+        }
+
+        public async Task<string?> LikeChapterAsync(string token, uint chapterId)
+        {
+            var client = this;
+            try
+            {
+                string url = Client.MangaLibApiBaseAddress + $"api/chapters/{chapterId}/like";
+                var response = await client.HttpClient.PostAsync(url, null);
+                var responseBody = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    client.LogMessage(nameof(LikeChapterAsync), "successfully liked");
+                }
+                return responseBody;
+            }
+            catch (Exception ex) 
+            {
+                client.LogError(nameof(LikeChapterAsync), ex.ToString());
+                return null; 
+            }
+        }
+        public static async Task<string?> GetChaptersAsync(Client client, string slug)
+        {
+            try
+            {
+                string url = Client.MangaLibApiBaseAddress + $"api/manga/{slug}/chapters";
+                HttpResponseMessage response = await client.HttpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    client.LogMessage(nameof(GetChaptersAsync), "successfully recieved chapters");
+                    return responseBody;
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    client.LogWarning(nameof(GetChaptersAsync), "Responce body: " + errorContent);
+                    return null;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                client.LogError(nameof(GetChaptersAsync), ex.ToString());
+                return null; 
+            }
+        }
+
         /// <summary> returns parsed title (manga or book) information by url. </summary>
         public async Task<MangaTitle?> GetTitleByUrlAsync(string url) => await GetTitleAsync(Client.GetSlugFromUrl(url));
 
@@ -190,6 +272,7 @@ namespace MangaLib
 
             return await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
+
         public async Task<List<MangaTitle>?> GetNewTitlesAsync() => await GetNewTitlesAsync(this);
         public async static Task<List<MangaTitle>?> GetNewTitlesAsync(Client client)
         {
@@ -237,6 +320,7 @@ namespace MangaLib
                 return null;
             }
         }
+
         public async Task AddBookmarkAsync(string slug, string token, uint bookmark = 1) => await AddBookmarkAsync(this, slug, token, bookmark);
         public async static Task AddBookmarkAsync(Client client, string slug, string token, uint bookmark = 1)
         {
@@ -271,6 +355,7 @@ namespace MangaLib
             }
 
         }
+
         public async Task AddVoteAsync(string slug, string token, uint vote = 10) => await AddVoteAsync(this, slug, token, vote);
         public async static Task AddVoteAsync(Client client, string slug, string token, uint vote = 10)
         {

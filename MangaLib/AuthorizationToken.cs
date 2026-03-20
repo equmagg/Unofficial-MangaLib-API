@@ -17,6 +17,7 @@ namespace MangaLib
         public readonly static AuthorizationToken NullInstance = new AuthorizationToken(null);
         /// <summary> checks if token is not null and not empty. </summary>
         public bool Exists => !string.IsNullOrEmpty(_authorizationToken);
+        /// <summary> raw value as a string without Bearer prefix. </summary>
         public string? TokenString => this.ToString();
         /// <summary> Internal raw value of an inner _authorizationToken field. </summary>
         internal string? TokenRaw => _authorizationToken;

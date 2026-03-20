@@ -7,4 +7,13 @@
     <RootNamespace>MangaLib</RootNamespace>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>UnofficialMangaLibAPI</PackageId>
+		<Version>1.0.1</Version>
+		<Authors>equmag</Authors>
+		<Description>Unofficially maintained library for MangaLib, RanobeLib, AuthorToday and Renovels on .NET</Description>
+
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)nuget</PackageOutputPath>
+	</PropertyGroup>
 </Project>

@@ -35,17 +35,20 @@ namespace MangaLib
                 field = value;
             }
         } = "https://api.cdnlibs.org/";
-        public Client(AuthorizationToken authorizationToken, WebProxy? proxy = null) : this(authorizationToken.TokenString, proxy) { }
-        public Client(string? authorizationToken = null, WebProxy? proxy = null)
+        public Client(AuthorizationToken authorizationToken, WebProxy? proxy = null, LogLevel logLevel = LogLevel.None) 
+            : this(authorizationToken.TokenString, proxy, logLevel) { }
+        public Client(string? authorizationToken = null, WebProxy? proxy = null, LogLevel logLevel = LogLevel.None)
         {
+            _logLevel = logLevel;
+            AuthorizationTokenString = authorizationToken;
+            _proxy = proxy;
             HttpClient = CreateHttpClient(authorizationToken);
-            Proxy = proxy;
         }
 
-        private readonly CookieContainer CdnLibsCookies = new();
-        public readonly HttpClient HttpClient;
-        public readonly WebProxy? Proxy = null;
-        private readonly LogLevel _logLevel = LogLevel.None;
+        private readonly CookieContainer Cookies = new();
+        public HttpClient HttpClient { get; private set; }
+        private WebProxy? _proxy = null;
+        public WebProxy? Proxy => _proxy;
 
         private AuthorizationToken _authorizationToken = AuthorizationToken.NullInstance;
         /// <summary> Authorization token instance. </summary>
@@ -74,9 +77,10 @@ namespace MangaLib
                     throw new ArgumentException(nameof(value), "AuthorizationToken must contain Bearer prefix.");
                 }
                 _authorizationToken = AuthorizationToken.CreateWithoutBearer(value.Replace("Bearer ", "").Trim());
+                UpdateClient();
             }
         }
-        /// <summary> Raw token representation without bearer. </summary>
+        /// <summary> Raw token representation without bearer. This is an intended way to set new token. </summary>
         /// <exception cref="ArgumentException"></exception>
         public string? AuthorizationTokenStringWithoutBearer
         {
@@ -91,18 +95,26 @@ namespace MangaLib
                     throw new ArgumentException(nameof(value), "Raw token set should not include Bearer.");
                 }
                 _authorizationToken = global::MangaLib.AuthorizationToken.CreateWithoutBearer(value);
+                UpdateClient();
             }
         }
         /// <summary> checks if token is not null and not empty. </summary>
         public bool AuthrizationTokenExists => _authorizationToken.Exists;
-
+        /// <summary> 
+        /// Must be called every time client is updated. 
+        /// Updates HttpClient to correspond the authorization token.  
+        /// </summary>
+        private void UpdateClient()
+        {
+            HttpClient = CreateHttpClient(AuthorizationTokenString);
+        }
         private HttpClient CreateHttpClient(string? authorizationToken)
         {
             var handler = new SocketsHttpHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli,
                 UseCookies = true,
-                CookieContainer = CdnLibsCookies,
+                CookieContainer = Cookies,
                 AllowAutoRedirect = true,
                 PooledConnectionLifetime = TimeSpan.FromMinutes(10),
 
@@ -133,7 +145,8 @@ namespace MangaLib
 
             return http;
         }
-
+        /// <summary> extracts slug from manga or book url. </summary>
+        /// <remarks> slug is used as an identifier for titles. </remarks>
         public static string GetSlugFromUrl(string url)
         {
             string slug = string.Empty;

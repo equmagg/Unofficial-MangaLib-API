@@ -19,6 +19,10 @@ namespace MangaLib
             this.Severity = severity;
             this.MethodName = methodName;
         }
+        public override string ToString()
+        {
+            return $"{Severity}: {(string.IsNullOrEmpty(MethodName) ? "" : $"[{MethodName}]")} {Message}";
+        }
     }
 
     public partial class Client
@@ -27,6 +31,7 @@ namespace MangaLib
         private List<Diagnostic> _diagnostics = new();
         /// <summary> Provides diagnostic summary of actions taken by the client. </summary>
         public IReadOnlyList<Diagnostic> Diagnostics => _diagnostics;
+        private readonly LogLevel _logLevel = LogLevel.None;
 
 
         private void LogError(string message) => LogError(null, message);
